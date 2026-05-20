@@ -6,6 +6,13 @@ const {
   findUserByEmail
 } = require ("../models/user.model");
 
+const {
+  HTTP_STATUS,
+  ERROR_MESSAGES,
+  sendError,
+  sendSuccess
+} = require("../utils/error.helper");
+
 const register = async (req, res) => {
   try {
     
@@ -13,9 +20,7 @@ const register = async (req, res) => {
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-      return res.status(400).json({
-        message: "Email already exists"
-      });
+      return sendError(res, HTTP_STATUS.BAD_REQUEST, ERROR_MESSAGES.EMAIL_EXISTS);
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -26,14 +31,10 @@ const register = async (req, res) => {
       hashedPassword
     );
 
-    res.status(201).json({
-      message: "User created succesfully"
-    });
+    sendSuccess(res, HTTP_STATUS.CREATED, ERROR_MESSAGES.USER_CREATED_SUCCESS);
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    sendError(res, HTTP_STATUS.SERVER_ERROR, error.message);
   }
 };
 
@@ -44,9 +45,7 @@ const login = async (req, res) => {
     const users = await findUserByEmail(email);
 
     if (!users) {
-      return res.status(404).json({
-        message: "User not found"
-      });
+      return sendError(res, HTTP_STATUS.NOT_FOUND, ERROR_MESSAGES.USER_NOT_FOUND);
     };
 
     const validPassword = await bcrypt.compare(
@@ -55,9 +54,7 @@ const login = async (req, res) => {
     );
 
     if (!validPassword){
-      return res.status(401).json({
-        message: "Invalid credentials"
-      })
+      return sendError(res, HTTP_STATUS.UNAUTHORIZED, ERROR_MESSAGES.INVALID_CREDENTIALS);
     };
 
     const token = jwt.sign(
@@ -76,9 +73,7 @@ const login = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    sendError(res, HTTP_STATUS.SERVER_ERROR, error.message);
   } 
 };
 
