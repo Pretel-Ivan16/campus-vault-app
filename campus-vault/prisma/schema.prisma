@@ -44,11 +44,17 @@ model Institute {
   careers       Career[]
 }
 
+enum ParentType {
+  FACULTY
+  INSTITUTE
+}
+
 model Career {
   id            Int         @id @default(autoincrement())
 
   facultyId     Int?
   instituteId   Int?
+  parentType    ParentType
 
   name          String
   slug          String
