@@ -8,74 +8,99 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model University {
-  id          Int         @id @default(autoincrement())
-  name        String
-  slug        String      @unique
-  createdAt   DateTime    @default(now())
+// Define your models here.
 
-  faculties   Faculty[]
-  institutes  Institute[]
+model University {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  country String
+  city    String
+  website String?
+  logoUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // users         User[]
+  faculties  Faculty[]
+  institutes Institute[]
 }
 
 model Faculty {
-  id            Int         @id @default(autoincrement())
-  universityId  Int
+  id Int @id @default(autoincrement())
 
-  name          String
-  slug          String
+  universityId Int
 
-  createdAt     DateTime    @default(now())
+  name        String
+  description String?
+  logoUrl     String?
+  website     String?
 
-  university    University  @relation(fields: [universityId], references: [id])
-  careers       Career[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  university University @relation(fields: [universityId], references: [id])
+
+  careers Career[]
+
+  @@unique([universityId, name])
 }
 
 model Institute {
-  id            Int         @id @default(autoincrement())
-  universityId  Int
+  id Int @id @default(autoincrement())
 
-  name          String
-  slug          String
+  universityId Int
 
-  createdAt     DateTime    @default(now())
+  name        String
+  description String?
+  logoUrl     String?
+  website     String?
 
-  university    University  @relation(fields: [universityId], references: [id])
-  careers       Career[]
-}
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-enum ParentType {
-  FACULTY
-  INSTITUTE
+  university University @relation(fields: [universityId], references: [id])
+
+  careers Career[]
+
+  @@unique([universityId, name])
 }
 
 model Career {
-  id            Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  facultyId     Int?
-  instituteId   Int?
-  parentType    ParentType
+  facultyId   Int?
+  instituteId Int?
 
-  name          String
-  slug          String
+  name        String
+  description String?
 
-  createdAt     DateTime    @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  faculty       Faculty?    @relation(fields: [facultyId], references: [id])
-  institute     Institute?  @relation(fields: [instituteId], references: [id])
+  faculty   Faculty?   @relation(fields: [facultyId], references: [id])
+  institute Institute? @relation(fields: [instituteId], references: [id])
 
-  subjects      Subject[]
+  subjects Subject[]
+
+  @@unique([facultyId, name])
+  @@unique([instituteId, name])
 }
 
 model Subject {
-  id            Int         @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  careerId      Int
+  careerId Int
 
-  name          String
-  code          String?
+  name        String
+  code        String?
+  semester    String?
+  description String?
 
-  createdAt     DateTime    @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  career        Career      @relation(fields: [careerId], references: [id])
+  career Career @relation(fields: [careerId], references: [id])
+
+  @@unique([careerId, code])
 }
