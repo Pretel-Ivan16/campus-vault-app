@@ -21,7 +21,7 @@ model University {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // users         User[]
+  user       User[]
   faculties  Faculty[]
   institutes Institute[]
 }
@@ -103,4 +103,108 @@ model Subject {
   career Career @relation(fields: [careerId], references: [id])
 
   @@unique([careerId, code])
+}
+
+model User {
+  id            String  @id
+  name          String
+  email         String
+  emailVerified Boolean @default(false)
+  image         String?
+
+  username String? @unique
+
+  bio String?
+
+  isActive   Boolean @default(true)
+  isVerified Boolean @default(false)
+
+  lastLoginAt DateTime?
+
+  universityId Int?
+  university   University? @relation(fields: [universityId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+
+  userRoles UserRole[]
+  // resources     Resource[]
+  // comments      Comment[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Role {
+  id Int @id @default(autoincrement())
+
+  name        String  @unique
+  description String?
+
+  createdAt DateTime @default(now())
+
+  userRoles UserRole[]
+}
+
+model UserRole {
+  userId String
+  roleId Int
+
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
 }
