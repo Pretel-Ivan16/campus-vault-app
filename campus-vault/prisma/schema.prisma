@@ -21,7 +21,7 @@ model University {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user       User[]
+  users      User[]
   faculties  Faculty[]
   institutes Institute[]
 }
@@ -102,6 +102,8 @@ model Subject {
 
   career Career @relation(fields: [careerId], references: [id])
 
+  resources Resource[]
+
   @@unique([careerId, code])
 }
 
@@ -131,7 +133,7 @@ model User {
   accounts Account[]
 
   userRoles UserRole[]
-  // resources     Resource[]
+  resources Resource[]
   // comments      Comment[]
 
   @@unique([email])
@@ -207,4 +209,72 @@ model UserRole {
   role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
+}
+
+model Resource {
+  id Int @id @default(autoincrement())
+
+  userId    String
+  subjectId Int
+
+  title       String
+  description String?
+
+  type ResourceType
+
+  thumbnailUrl String?
+
+  page     Int?
+  language String?
+
+  downloadsCount Int @default(0)
+  viewsCount     Int @default(0)
+
+  status ResourceStatus @default(DRAFT)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  publishedAt DateTime?
+
+  user    User    @relation(fields: [userId], references: [id])
+  subject Subject @relation(fields: [subjectId], references: [id])
+
+  files ResourceFile[]
+}
+
+model ResourceFile {
+  id Int @id @default(autoincrement())
+
+  resourceId Int
+
+  fileName String
+  fileUrl  String
+
+  fileType String
+
+  fileSize BigInt
+
+  createdAt DateTime @default(now())
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([resourceId])
+}
+
+enum ResourceType {
+  NOTES
+  SUMMARY
+  EXAM
+  GUIDE
+  SLIDES
+  EXERCISE
+  OTHER
+}
+
+enum ResourceStatus {
+  DRAFT
+  PUBLISHED
+  HIDDEN
+  ARCHIVED
 }
