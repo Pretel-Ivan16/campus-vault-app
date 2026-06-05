@@ -132,9 +132,15 @@ model User {
   sessions Session[]
   accounts Account[]
 
-  userRoles UserRole[]
-  resources Resource[]
-  comments  Comment[]
+  userRoles     UserRole[]
+  resources     Resource[]
+  resourceLikes ResourceLike[]
+  comments      Comment[]
+  commentLikes  CommentLike[]
+  favorites     Favorite[]
+
+  following Follow[] @relation("UserFollowing")
+  followers Follow[] @relation("UserFollowers")
 
   @@unique([email])
   @@map("user")
@@ -240,9 +246,11 @@ model Resource {
   user    User    @relation(fields: [userId], references: [id])
   subject Subject @relation(fields: [subjectId], references: [id])
 
-  files        ResourceFile[]
-  resourceTags ResourceTag[]
-  comments     Comment[]
+  files         ResourceFile[]
+  resourceTags  ResourceTag[]
+  comments      Comment[]
+  favorites     Favorite[]
+  resourceLikes ResourceLike[]
 }
 
 model ResourceFile {
@@ -279,6 +287,18 @@ enum ResourceStatus {
   PUBLISHED
   HIDDEN
   ARCHIVED
+}
+
+model ResourceLike {
+  userId     String
+  resourceId Int
+
+  createdAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, resourceId])
 }
 
 model Tag {
@@ -325,5 +345,41 @@ model Comment {
 
   replies Comment[] @relation("CommentReplies")
 
-  // commentLike     commentLike
+  commentLikes CommentLike[]
+}
+
+model CommentLike {
+  userId    String
+  commentId Int
+
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@id([userId, commentId])
+}
+
+model Favorite {
+  userId     String
+  resourceId Int
+
+  createdAt DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@id([userId, resourceId])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+
+  createdAt DateTime @default(now())
+
+  follower  User @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
 }
