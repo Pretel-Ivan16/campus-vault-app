@@ -240,7 +240,8 @@ model Resource {
   user    User    @relation(fields: [userId], references: [id])
   subject Subject @relation(fields: [subjectId], references: [id])
 
-  files ResourceFile[]
+  files        ResourceFile[]
+  resourceTags ResourceTag[]
 }
 
 model ResourceFile {
@@ -277,4 +278,28 @@ enum ResourceStatus {
   PUBLISHED
   HIDDEN
   ARCHIVED
+}
+
+model Tag {
+  id Int @id @default(autoincrement())
+
+  slug String @unique
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  resourceTags ResourceTag[]
+}
+
+model ResourceTag {
+  resourceId Int
+  tagId      Int
+
+  createdAt DateTime @default(now())
+
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([resourceId, tagId])
 }
