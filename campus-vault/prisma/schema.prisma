@@ -134,7 +134,7 @@ model User {
 
   userRoles UserRole[]
   resources Resource[]
-  // comments      Comment[]
+  comments  Comment[]
 
   @@unique([email])
   @@map("user")
@@ -242,6 +242,7 @@ model Resource {
 
   files        ResourceFile[]
   resourceTags ResourceTag[]
+  comments     Comment[]
 }
 
 model ResourceFile {
@@ -302,4 +303,27 @@ model ResourceTag {
   tag      Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([resourceId, tagId])
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+
+  userId     String
+  resourceId Int
+
+  parentCommentId Int?
+  content         String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deletedAt DateTime?
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  resource      Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  parentComment Comment? @relation("CommentReplies", fields: [parentCommentId], references: [id])
+
+  replies Comment[] @relation("CommentReplies")
+
+  // commentLike     commentLike
 }
