@@ -142,6 +142,9 @@ model User {
   following Follow[] @relation("UserFollowing")
   followers Follow[] @relation("UserFollowers")
 
+  reports         Report[] @relation("UserReports")
+  resolvedReports Report[] @relation("ResolvedReports")
+
   @@unique([email])
   @@map("user")
 }
@@ -382,4 +385,39 @@ model Follow {
   following User @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@id([followerId, followingId])
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWING
+  RESOLVED
+  REJECTED
+}
+
+enum ReportTargetType {
+  RESOURCE
+  COMMENT
+  USER
+}
+
+model Report {
+  id Int @id @default(autoincrement())
+
+  reporterUserId String
+
+  targetType ReportTargetType
+  targetId   String
+
+  reason      String
+  description String?
+
+  status ReportStatus @default(PENDING)
+
+  resolvedByUserId String?
+
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  reporter   User  @relation("UserReports", fields: [reporterUserId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("ResolvedReports", fields: [resolvedByUserId], references: [id])
 }
