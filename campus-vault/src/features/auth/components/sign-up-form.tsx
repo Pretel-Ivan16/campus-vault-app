@@ -1,73 +1,57 @@
 "use client";
 
-import {useForm} from "react-hook-form";
-import {zodResolver} from "@hookform/resolvers/zod";
-
-import { signUpSchema, SignUpInput } from "../schemas/sign-up-schema";
-
-import { authClient } from "@/lib/auth-client";
+import { useSignUpForm } from "../hooks/use-sign-up-form";
+import { AuthInput } from "@/components/forms/AuthInput";
+import { AuthFormHeader } from "@/components/forms/AuthFormHeader";
+import { AuthSubmitButton } from "@/components/forms/AuthSubmitButton";
 
 export function SignUpForm(){
   const{
     register,
     handleSubmit,
     formState: { errors, isSubmitting},
-  } = useForm<SignUpInput>({
-    resolver: zodResolver(signUpSchema)
-  });
-  
-  async function onSubmit(data:SignUpInput) {
-    const result = await authClient.signUp.email({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    });
-  
-    console.log(result)
-  }
+    onSubmit,
+  } = useSignUpForm();
 
   return(
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
-        <label>Nombre</label>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="mx-auto flex w-full gap-3.5 max-w-md flex-col space-y-5 rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8"
+    >
+      <AuthFormHeader
+        title="Crear cuenta"
+        subtitle="Completa tus datos para registrarte."
+      />
 
-        <input 
-          type="text"
-          {...register("name")}
-        />
+      <AuthInput 
+        label="Nombre" 
+        type="text" 
+        registration={register("name")}
+        error={errors.name?.message}
+      />
 
-        {errors.name && (
-          <p>{errors.name.message}</p>
-        )}
-      </div>
-      <div>
-        <label>Email</label>
+      <AuthInput 
+        label="Correo Electrónico" 
+        type="text" 
+        registration={register("email")}
+        error={errors.email?.message}
+      />
 
-        <input 
-          type="text"
-          {...register("email")}
-        />
+      <AuthInput 
+        label="Contraseña" 
+        type="password" 
+        registration={register("password")}
+        error={errors.password?.message}
+      />
 
-        {errors.email && (
-          <p>{errors.email.message}</p>
-        )}
-      </div>
-      <div>
-        <label>Contraseña</label>
+      <AuthInput
+        label="Repetir contraseña"
+        type="password"
+        registration={register("confirmPassword")}
+        error={errors.confirmPassword?.message}
+      />
 
-        <input 
-          type="text"
-          {...register("password")}
-        />
-
-        {errors.password && (
-          <p>{errors.password.message}</p>
-        )}
-      </div>
-
-      <button type="submit" disabled={isSubmitting}>
-        Registrarse
-      </button>
+      <AuthSubmitButton text="Registrarse" disabled={isSubmitting} />
     </form>
   );
 }
