@@ -24,7 +24,7 @@ export function SignUpForm(){
       />
 
       <AuthInput 
-        label="Nombre" 
+        label="Usuario" 
         type="text" 
         registration={register("name")}
         error={errors.name?.message}
@@ -50,6 +50,10 @@ export function SignUpForm(){
         registration={register("confirmPassword")}
         error={errors.confirmPassword?.message}
       />
+
+      {errors.root?.message && (
+        <p className="text-sm font-medium text-rose-600">{errors.root.message}</p>
+      )}
 
       <AuthSubmitButton text="Registrarse" disabled={isSubmitting} />
     </form>
