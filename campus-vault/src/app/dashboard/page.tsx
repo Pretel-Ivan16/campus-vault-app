@@ -1,11 +1,23 @@
-import React from 'react'
+import { SignOutButton } from "@/features/auth/components/sign-out-button";
+import { getSession } from "@/lib/session";
+import { redirect } from "next/navigation";
 
-function page() {
+export default async function DashboardPage() {
+  const session = await getSession();
+
+  if (!session){
+    redirect("/sign-in");
+  }
+
   return (
-    <div>
-      Hola
-    </div>
+    <main>
+      <h1>Dashboard</h1>
+
+      <p>
+        Bienvenido {session.user.name}
+      </p>
+
+      <SignOutButton />
+    </main>
   )
 }
-
-export default page
